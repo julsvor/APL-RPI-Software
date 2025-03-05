@@ -10,6 +10,7 @@ parser.add_argument('-o', '--output', help="Where to output the database when cr
 parser.add_argument('-db', '--database', help="Path to the database when list, delete or add is used")
 parser.add_argument('-v', '--verbose', action='store_true')  # Verbose mode
 
+number_size = 4 # Doesnt change the length of the number in the database creation query
 
 def get_ips_from_db(db) -> list[str]:
     """Get all current IP addresses """
@@ -41,10 +42,13 @@ def add_ips_to_db(db, ip_addresses:list[str]):
 
     for ip_phone_combo in ip_addresses:
         if ip_phone_combo.count('=') != 1:
-            print("[ERROR] Invalid ip and phone format %s" % ip_phone_combo)
+            print("[ERROR] Invalid IP and phone format %s" % ip_phone_combo)
             continue
-
-        ip = ipaddress.ip_address(ip_phone_combo.split('=')[0])
+        try:
+            ip = ipaddress.ip_address(ip_phone_combo.split('=')[0])
+        except ValueError as e:
+            print("[ERROR] Invalid IP Adress: %s" % e)
+            continue
         number = ip_phone_combo.split('=')[1]
 
         ## Check IP
@@ -52,8 +56,8 @@ def add_ips_to_db(db, ip_addresses:list[str]):
             print("[WARNING] Added ip '%s' is a loopback address" % ip)
         
         ## Check Phone number
-        if len(number) != 4:
-            print("[WARNING] Phone number '%s' is outside of the recommended size of 4 digits" % number)
+        if len(number) != number_size:
+            print("[WARNING] Phone number '%s' is outside of the recommended size of %s digits" % (number_size, number))
 
         print("Adding ip '%s' with number '%s'" % (ip, number))
 
@@ -66,6 +70,8 @@ def add_ips_to_db(db, ip_addresses:list[str]):
             con.commit()
         except sqlite3.OperationalError as e:
             print("[ERROR] %s" % e)
+        except sqlite3.IntegrityError as e:
+            print("[ERROR] You can not have the same phone number pointing to different ip addresses. Error: %s" % e)
         finally:
             con.close()
 
@@ -78,8 +84,8 @@ def create_db(name):
 
     query="""
     CREATE TABLE phone_to_ip(
-    phone_number varchar(4),
-    ip BINARY(4) UNIQUE
+    phone_number varchar(4) UNIQUE,
+    ip BINARY(4)
     );
     """
 
