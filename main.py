@@ -1,25 +1,26 @@
-from gpiozero import InputDevice, OutputDevice
-import sqlite3
-import time
-import logging
-import ipaddress
+from gpiozero import InputDevice, OutputDevice # type: ignore
+import sqlite3, time, logging, ipaddress
 
-logger = logging.getLogger()
-logging.basicConfig(level=logging.INFO)
-# logger.disabled = True
 
-Dial = InputDevice(pin=5, pull_up=False)
-Pulse = InputDevice(pin=6, pull_up=True)
 
-Dialing = 0
 
-timeout_len = 30 # Timeout in seconds between digits in a number, only activates if dialing is off so states arent mismatched
+# LOGGING
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] - %(asctime)s - %(message)s")
 
-number_length = 4 # Times out if not reached withing timeout_len, Stops dialing when reached
+# PIN SETUP
+Dial = InputDevice(pin=5, pull_up=False) # Start dialing
+Pulse = InputDevice(pin=6, pull_up=True) # Recieves pulse each falling edge when dialing is activated
 
-number_arr = []
+# CONFIG
+timeout_len = 30 # Stores timeout in seconds between digits in a number, only checked when dialing is off
+number_length = 4 # Stores expected length of the number
 
-timeout: int | None = None
+# GLOBAL VARS
+number_arr = [] # Store whole number
+timeout: int | None = None # Stores 
+Dialing = 0 # Stores previous Dial value
+
 
 def resolve_number_to_ip(number:str) -> str | None:
 	logger.info("Resolving number: %s" % number)
@@ -29,7 +30,6 @@ def resolve_number_to_ip(number:str) -> str | None:
 	query = """
 	SELECT ip FROM phone_to_ip WHERE phone_number = ?;
 	"""
-
 
 	try:
 		result = cursor.execute(query, (number,))
