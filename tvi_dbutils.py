@@ -1,26 +1,30 @@
-import argparse, sqlite3, logging, os, ipaddress
+import argparse
+import logging
+import os
+import ipaddress
+import mariadb
 from tvi_phone_ip_pair import PhoneNumberIPPair
 
-logger = logging.getLogger("TVI")
+logger = logging.getLogger("tvi-logger")
 
-def get_ips_from_db(conn:sqlite3.Connection) -> list[str]|None:
-    """Get all current records in database"""
+
+def get_ips_from_db(conn: mariadb.Connection) -> list[str] | None:
     try:
         cursor = conn.cursor()
 
         query = """
-        SELECT phone_number, ip FROM phone_to_ip;
+        SELECT number, ip_address FROM number_ip_mappings;
         """
 
         result = cursor.execute(query)
-        records = result.fetchall()
+        records = cursor.fetchall()
         return records
-    except sqlite3.OperationalError as e:
-        logger.error("SQLite error: ", exc_info=e)
-    
+    except mariadb.Error as e:
+        logger.error("MariaDB error: ", exc_info=e)
 
 
-def add_numbers_to_db(conn:sqlite3.Connection, ip_phone_combo:list[PhoneNumberIPPair]) -> None:
+def add_numbers_to_db(conn: mariadb.Connection,
+                      ip_phone_combo: list[PhoneNumberIPPair]) -> None:
     try:
         cursor = conn.cursor()
 
@@ -29,145 +33,148 @@ def add_numbers_to_db(conn:sqlite3.Connection, ip_phone_combo:list[PhoneNumberIP
         for combo in ip_phone_combo:
 
             if combo.is_valid() == False:
-                logger.error("Skipping, Invalid IP/Number format: '%s'" % combo.get_combo_str())
+                logger.error(
+                    "Skipping, Invalid IP/Number format: '%s'" %
+                    combo.get_combo_str(),
+                    exc_info=combo.get_error())
                 continue
 
-            data_list.append((combo.get_ip_address(), combo.get_phone_number()))
+            data_list.append(
+                (combo.get_raw_ip_address(),
+                 combo.get_phone_number()))
+
+        if len(data_list) < 1:
+            logger.warning("No numbers were added as all failed to validate")
+            return
 
         query = """
-        INSERT INTO phone_to_ip ('ip', 'phone_number')
+        INSERT INTO number_ip_mappings (ip_address, number)
         VALUES (?, ?);"""
-            
+
         cursor.executemany(query, data_list)
 
         conn.commit()
-    except sqlite3.Error as e:
-        logger.error("SQLite error: ", exc_info=e)
+    except mariadb.IntegrityError as e:
+        logger.error("Trying to add number that already exists")
+    except mariadb.Error as e:
+        logger.error("MariaDB error: ", exc_info=e)
 
 
-def remove_numbers_from_db(conn:sqlite3.Connection, numbers_list:list[int], number_len):
+def remove_numbers_from_db(conn: mariadb.Connection, numbers_list: list[int]):
     try:
         cursor = conn.cursor()
 
         data_list = []
 
         for number in numbers_list:
-
-            if len(str(number)) != number_len:
-                logger.error("Skipping, Number '%s' of length %i gotten, expected a number of length %i" % (number, len(str(number)), number_len))
-                continue
-
             data_list.append(tuple([number]))
 
         query = """
-        DELETE FROM phone_to_ip
-        WHERE phone_number = ?;
+        DELETE FROM number_ip_mappings
+        WHERE number = ?;
         """
-            
+
         cursor.executemany(query, data_list)
 
         conn.commit()
-    except sqlite3.Error as e:
-        logger.error("SQLite error: ", exc_info=e)
+    except mariadb.Error as e:
+        logger.error("MariaDB error: ", exc_info=e)
 
 
-def create_db(name:str, meta_number_length) -> None:
-    try:
-        conn = sqlite3.connect(name)
-
-        cursor = conn.cursor()
-
-        cursor.execute("BEGIN TRANSACTION;")
-
-        query="""
-        CREATE TABLE phone_to_ip(
-        phone_number INT(255) UNIQUE,
-        ip BINARY(4)
-        );
-        """
-
-        query2= """CREATE TABLE meta(
-        phone_number_length INT NOT NULL UNIQUE
-        );
-        """
-
-        query3 = """
-        INSERT INTO meta ('phone_number_length') VALUES(?);
-        """
-
-        cursor.execute(query)
-        cursor.execute(query2)
-        cursor.execute(query3, tuple([meta_number_length]))
-
-        conn.commit()
-    except sqlite3.Error as e:
-        conn.close()
-        logger.error("SQLite error: ", exc_info=e)
-        os.remove(name)
-
-
-def verify_database_structure(conn:sqlite3.Connection) -> bool:
+def get_database_number_len(conn: mariadb.Connection) -> int | None:
     try:
         cursor = conn.cursor()
 
         query = """
-        SELECT name FROM sqlite_master WHERE type='table' AND name='phone_to_ip';
-        """
-        
-        query2 = """
-        SELECT name FROM sqlite_master WHERE type='table' AND name='meta';
-        """
-
-        cursor.execute(query)
-        resolve_table_exists = cursor.fetchone()
-
-        cursor.execute(query2)
-        meta_table_exists = cursor.fetchone()
-
-        return False if not resolve_table_exists or not meta_table_exists else True
-            
-
-    except sqlite3.Error as e:
-        logger.error("SQLite error: ", exc_info=e)
-        return False
-
-
-def get_database_number_len(conn:sqlite3.Connection) -> int | None:
-    try:
-        cursor = conn.cursor()
-
-        query = """
-        SELECT phone_number_length FROM meta;
+        SELECT number_length FROM settings;
         """
 
         cursor.execute(query)
         number_len = cursor.fetchone()
 
-        return number_len[0] if type(number_len) == tuple else None
-            
+        return number_len[0] if isinstance(number_len, tuple) else None
 
-    except sqlite3.Error as e:
-        logger.error("SQLite error: ", exc_info=e)
-
+    except mariadb.Error as e:
+        logger.error("MariaDB error: ", exc_info=e)
 
 
-def resolve_number_to_ip(conn:sqlite3.Connection, number:int|str) -> str | None:
+def resolve_number_to_ip(conn: mariadb.Connection,
+                         number: int | str) -> str | None:
     logger.info("Attempting to resolve number '%s'" % number)
     try:
         cursor = conn.cursor()
 
         query = """
-        SELECT ip FROM phone_to_ip WHERE phone_number = ?;
+        SELECT ip FROM number_ip_mappings WHERE number = ?;
         """
         result = cursor.execute(query, (number,))
-        result = result.fetchone()
+        result = cursor.fetchone()
 
-        if type(result) == tuple:
+        if isinstance(result, tuple):
             ip = str(ipaddress.ip_address(result[0]))
-            logger.info("Resolved number '%s' to IP adress '%s'" % (number, ip))
+            logger.info(
+                "Resolved number '%s' to IP adress '%s'" %
+                (number, ip))
             return ip
         return result
     except Exception as e:
-        logger.error("Failed to resolve number '%s', got error:" % number, e, exc_info=True)
+        logger.error(
+            "Failed to resolve number '%s', got error:" %
+            number, e, exc_info=True)
 
 
+def create_db(user: str, password: str, number_length: int) -> None:
+    try:
+        conn = mariadb.connect(host="localhost", user=user, password=password)
+
+        cursor = conn.cursor()
+
+        cursor.execute("CREATE DATABASE tvi")
+
+        cursor.execute("USE tvi")
+
+        cursor.execute("START TRANSACTION;")
+
+        query = """
+            CREATE TABLE IF NOT EXISTS number_ip_mappings (
+                number INT UNSIGNED PRIMARY KEY,
+                ip_address BINARY(4) NOT NULL,
+                port INT UNSIGNED NULL,
+                UNIQUE (number),
+                INDEX (ip_address)
+            );
+        """
+
+        query2 = """
+            CREATE TABLE IF NOT EXISTS settings (
+                id TINYINT UNSIGNED PRIMARY KEY DEFAULT 1,
+                number_length TINYINT UNSIGNED NOT NULL,
+                CONSTRAINT unique_settings CHECK (id = 1)
+            );
+        """
+
+        query3 = """
+            INSERT INTO settings (number_length) VALUES(?);
+        """
+
+        cursor.execute(query)
+        cursor.execute(query2)
+        cursor.execute(query3, tuple([number_length]))
+
+        conn.commit()
+    except mariadb.Error as e:
+        logger.error("MariaDB error: ", exc_info=e)
+
+
+def drop_db(conn: mariadb.Connection) -> None:
+    try:
+
+        cursor = conn.cursor()
+
+        query = "DROP DATABASE tvi;"
+
+        cursor.execute(query)
+
+        conn.commit()
+    except mariadb.Error as e:
+        logger.error("MariaDB error: ", exc_info=e)

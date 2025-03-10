@@ -16,6 +16,22 @@ LIB1=tvi_connection_utils.py
 LIB2=tvi_dbutils.py
 LIB3=tvi_phone_ip_pair.py
 
+echo "Installing MariaDB"
+apt install -y mariadb libmariadb-dev
+pip install mariadb
+
+mysql -e "
+CREATE USER 'tvi_run_dbuser'@localhost IDENTIFIED BY '';
+GRANT SELECT ON *.* TO 'tvi_run_dbuser'@'localhost';
+FLUSH PRIVILEGES;
+"
+
+mysql -e "
+CREATE USER 'tvi_dbcli_dbuser'@localhost IDENTIFIED BY 'readwrite'; 
+GRANT ALL PRIVILEGES ON *.* TO 'tvi_dbcli_dbuser'@'localhost';
+FLUSH PRIVILEGES;
+"
+
 echo "Creating user '$SERVICE_USER' with group 'gpio'"
 sudo useradd -M -U -r -G gpio -s /usr/sbin/nologin $SERVICE_USER
 
@@ -37,4 +53,5 @@ cp $LIB3 $LIBRARY_DIR
 chown tvi:tvi "${LIBRARY_DIR}${LIB3}"
 
 echo "Installation finished, start the software with systemctl start tvi"
+echo "run 'db-cli create' to create a new database"
 

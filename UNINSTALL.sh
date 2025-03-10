@@ -16,6 +16,22 @@ LIB1=tvi_connection_utils.py
 LIB2=tvi_dbutils.py
 LIB3=tvi_phone_ip_pair.py
 
+
+echo "Dropping database and users"
+
+mysql -e "
+DROP DATABASE tvi;
+"
+
+mysql -e "
+DROP USER 'tvi_run_dbuser'@localhost;
+"
+
+mysql -e "
+DROP USER 'tvi_dbcli_dbuser'@localhost; 
+"
+
+
 echo "Removing user '$SERVICE_USER'"
 userdel $SERVICE_USER
 

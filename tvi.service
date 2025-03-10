@@ -6,6 +6,5 @@ User=tvi
 
 ExecStart=python /usr/local/bin/tvi-run.py
 
-StateDirectory=tvi
 LogsDirectory=tvi
 
