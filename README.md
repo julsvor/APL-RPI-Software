@@ -4,7 +4,7 @@ Main logic for reading signals and resolving numbers to ip addresses
 ## tvi-dbcli 
 Util functions and command line creation/interaction with sqlite database  
 ## Usage
-On windows you may need to prefix dbcli with the python executable
+You may need to prefix tvi-dbcli with the python executable
 ```cmd
 python.exe tvi-dbcli
 ```
