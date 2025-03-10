@@ -1,0 +1,11 @@
+[Unit]
+Description=A service to run dial analog to digital signal conversion and number resolution.
+
+[Service]
+User=tvi
+
+ExecStart=python /usr/local/bin/tvi-run.py
+
+StateDirectory=tvi
+LogsDirectory=tvi
+

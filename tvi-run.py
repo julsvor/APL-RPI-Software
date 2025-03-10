@@ -1,19 +1,28 @@
 #!/usr/bin/python
 import sqlite3, time, logging, ipaddress, os
 from gpiozero import InputDevice, OutputDevice # type: ignore
-from dbutil import verify_database_structure, get_database_number_len, resolve_number_to_ip
-from connection_utils import CallIP
+from tvi_dbutils import verify_database_structure, get_database_number_len, resolve_number_to_ip
+from tvi_connection_utils import CallIP
+from pathlib import Path
+
+LOGS_DIR = os.getenv("LOGS_DIRECTORY", None)
+DATABASE_DIR = os.getenv("STATE_DIRECTORY", "")
+logfile = "log.txt"
+
+if LOGS_DIR != None:
+	LOGS_DIR = Path(LOGS_DIR, logfile)
+
 
 # LOGGING
-logger = logging.getLogger("apl-rpi-software")
-logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] - %(asctime)s - %(message)s")
+logger = logging.getLogger("TVI")
+logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] - %(asctime)s - %(message)s", filename=LOGS_DIR)
 
 # PIN SETUP
 Dial = InputDevice(pin=5, pull_up=False) # Start dialing
 Pulse = InputDevice(pin=6, pull_up=True) # Recieves pulse each falling edge when dialing is activated
 
 # CONFIG
-database_name = "database.db" # Stores the name of the database file
+database_name = "database" # Stores the name of the database file
 timeout_len = 30 # Stores timeout in seconds between digits in a number, only checked when dialing is off
 
 # GLOBAL VARS
@@ -26,6 +35,11 @@ Dialing = 0 # Stores previous Dial value
 
 
 ## INIT
+if Path(database_name).stem == database_name:
+	database_name = Path(DATABASE_DIR, database_name)
+	database_name = str(database_name)
+
+
 if not os.path.isfile(database_name):
 	logger.critical("Database '%s' not found" % database_name)
 	exit(1)
@@ -47,7 +61,7 @@ with sqlite3.connect(database_name) as conn:
 	logger.info("Initialization finished")
 
 
-
+## MAIN LOOP
 while True:
 	if Dialing != Dial.value:
 		Dialing = Dial.value

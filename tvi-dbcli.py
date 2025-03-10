@@ -1,20 +1,21 @@
 #!/usr/bin/python
 import argparse, sqlite3, logging, os
-from phone_ip_pair import PhoneNumberIPPair
-from dbutil import create_db, add_numbers_to_db, remove_numbers_from_db, get_database_number_len, get_ips_from_db, verify_database_structure
+from tvi_phone_ip_pair import PhoneNumberIPPair
+from tvi_dbutils import create_db, add_numbers_to_db, remove_numbers_from_db, get_database_number_len, get_ips_from_db, verify_database_structure
+from pathlib import Path
 
 logger = logging.getLogger("dbcli")
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s - %(message)s")
 
 ## COMMAND PARSER
-parser = argparse.ArgumentParser(prog='dbcli',description='create database and interact with ip addresses in database')
+parser = argparse.ArgumentParser(prog =__package__,description='create databases and interact with data in them')
 parser.add_argument('-v', '--verbose', action='store_true')
 
-subparser = parser.add_subparsers(dest="command")
+subparser = parser.add_subparsers(dest="command", required=True)
 
 ## Add to database
 add_subparser = subparser.add_parser("add")
-add_subparser.add_argument("ip_number_pairs", nargs='*', type=str, help="A list of numbers and their associated ip addresses to add")
+add_subparser.add_argument("ip_number_pairs", nargs='*', type=str, help="A list of numbers and their associated numbers to add")
 add_subparser.add_argument('-db', '--database', help="path to the database to use", default="database.db", type=str)
 
 ## Delete from database
@@ -35,13 +36,25 @@ create_subparser.add_argument('-l', '--number-length', help="the length of numbe
 validate_subparser = subparser.add_parser("validate")
 validate_subparser.add_argument('-db', '--database', help="path to the database to use", default="database.db", type=str)
 
+databases_subparser = subparser.add_parser("databases", help="List the currecntly existing named databases")
 
 
 def main(args):
 
     command = args.command
+
+    if command == "databases":
+        onlyfiles = [f for f in os.listdir("/var/lib/tvi/") if os.path.isfile(os.path.join("/var/lib/tvi/", f))]
+        print(onlyfiles)
+
     database = args.database
 
+    if Path(database_name).stem == database_name:
+        database_name = Path("/var/lib/tvi/", database_name)
+        database_name = str(database_name)
+        
+    print(database_name)
+    exit()
 
 
     if command != "create":
@@ -49,11 +62,10 @@ def main(args):
                 logger.critical("Database file '%s' not found", database)
                 exit(1)
 
-            if verify_database_structure(database) == False:
-                logger.critical("Invalid database structure")
-                exit(1)
-
             with sqlite3.connect(database) as conn:
+                if verify_database_structure(conn) == False:
+                    logger.critical("Invalid database structure")
+                    exit(1)
                 if command == "add":
                     number_length = get_database_number_len(conn)
                     ip_number_pairs = [PhoneNumberIPPair(combo, number_length) for combo in args.ip_number_pairs]

@@ -16,8 +16,8 @@ class PhoneNumberIPPair():
             combo_str, port = combo_str.split(":", 1)
 
             if port and type(port) == int:
-                raise NotImplementedError("Port feature has not been implmented yet")
                 self.__port = port
+                raise NotImplementedError("Port feature has not been implmented yet")
 
             number, ip = combo_str.split("=", 1)
 
@@ -37,7 +37,6 @@ class PhoneNumberIPPair():
         except Exception as e:
             self.__is_valid = False
             self.__error = e
-            # raise ValueError("Incorrect pair format: %s" % e)
 
     def get_ip_address(self) -> str:
         ip = [str(x) for x in self.__ip_address]
