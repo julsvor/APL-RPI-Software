@@ -46,3 +46,8 @@ dbcli create -n example.db -l 6 # Creates a database named 'example.db' with the
 ### validate
 validates a databases table structure
 ```bash
+dbcli validate # Validates the database 'database.db'
+```
+```bash
+dbcli validate db example.db # Validates the database 'example.db'
+```
