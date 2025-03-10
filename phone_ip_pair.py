@@ -7,11 +7,20 @@ class PhoneNumberIPPair():
     __is_valid:bool = True
     __error:Exception
     __combo_str:str
+    __port: int
 
     def __init__(self, combo_str:str, phone_number_size=4):
         self.__combo_str = combo_str
         try:
+
+            combo_str, port = combo_str.split(":", 1)
+
+            if port and type(port) == int:
+                raise NotImplementedError("Port feature has not been implmented yet")
+                self.__port = port
+
             number, ip = combo_str.split("=", 1)
+
 
             ## IP VALIDATION
             ip = ip_address(ip)
