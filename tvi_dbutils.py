@@ -67,7 +67,7 @@ def remove_numbers_from_db(conn: mariadb.Connection, numbers_list: list[str], nu
             if len(number) != number_length:
                 logger.error("Skipping, number '%s' of length '%s' gotten, expected number of length '%s'" % (number, len(number), number_length))
                 continue
-            
+            logger.info("Adding number '%s' to delete list" % number)
             data_list.append((number,))
 
         if len(data_list) < 1:
@@ -79,8 +79,6 @@ def remove_numbers_from_db(conn: mariadb.Connection, numbers_list: list[str], nu
         DELETE FROM number_ip_mappings
         WHERE number = ?;
         """
-
-        print(data_list)
 
         cursor.executemany(query, data_list)
 
