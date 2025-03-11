@@ -3,7 +3,7 @@ import argparse
 import mariadb
 import logging
 from tvi_phone_ip_pair import PhoneNumberIPPair
-from tvi_dbutils import create_db, add_numbers_to_db, remove_numbers_from_db, get_database_number_len, get_ips_from_db, drop_db
+from tvi_dbutils import create_db, add_numbers_to_db, remove_numbers_from_db, get_database_number_len, get_ips_from_db, drop_db, database_exists
 from ipaddress import ip_address
 
 logger = logging.getLogger("dbcli")
@@ -34,7 +34,7 @@ delete_subparser = subparser.add_parser(
 delete_subparser.add_argument(
     "numbers",
     nargs='*',
-    type=int,
+    type=str,
     help="A list of numbers to remove",
 )
 
@@ -59,16 +59,24 @@ drop_subparser = subparser.add_parser("drop", help="Remove database")
 def main(args):
 
     command = args.command
+    db_exists = database_exists(user="tvi_dbcli_dbuser", password="readwrite")
+
 
     if command != "create":
 
+        if db_exists == False:
+            logger.critical("Database not found")
+            exit(1)
+
         with mariadb.connect(host="localhost", user="tvi_dbcli_dbuser", password="readwrite", database="tvi") as conn:
+
+
             if command == "add":
                 number_length = get_database_number_len(conn)
-                ip_number_pairs = [
-                    PhoneNumberIPPair(
-                        combo,
-                        number_length) for combo in args.ip_number_pairs]
+                ip_number_pairs = [PhoneNumberIPPair(combo,number_length) for combo in args.ip_number_pairs]
+                if len(ip_number_pairs) < 1:
+                    logger.info("No numbers to add")
+                    exit(0)
                 add_numbers_to_db(conn, ip_number_pairs)
             elif command == "list":
                 number_length = get_database_number_len(conn)
@@ -86,11 +94,19 @@ def main(args):
                                 record[1][1]).compressed))
             elif command == "delete":
                 numbers = args.numbers
-                remove_numbers_from_db(conn, numbers)
+                number_length = get_database_number_len(conn)
+                if len(numbers) < 1:
+                    logger.info("No numbers to delete")
+                    exit(0)
+                remove_numbers_from_db(conn, numbers, number_length)
             elif command == "drop":
                 drop_db(conn)
 
     else:
+        if db_exists == True:
+            logger.critical("Database already exists")
+            exit(1)
+
         create_db("tvi_dbcli_dbuser", "readwrite", args.number_length)
 
 

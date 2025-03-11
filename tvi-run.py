@@ -10,12 +10,11 @@ from tvi_connection_utils import CallIP
 from pathlib import Path
 
 
-LOGS_DIR = os.getenv("LOGS_DIRECTORY", None)
-DATABASE_DIR = os.getenv("STATE_DIRECTORY", "")
-logfile = "log.txt"
+# LOGS_DIR = os.getenv("LOGS_DIRECTORY", None)
+# logfile = "log.txt"
 
-if LOGS_DIR is not None:
-    LOGS_DIR = Path(LOGS_DIR, logfile)
+# if LOGS_DIR is not None:
+#     LOGS_DIR = Path(LOGS_DIR, logfile)
 
 
 # LOGGING
@@ -23,7 +22,7 @@ logger = logging.getLogger("tvi-logger")
 logging.basicConfig(
     level=logging.DEBUG,
     format="[%(levelname)s] - %(asctime)s - %(message)s",
-    filename=LOGS_DIR)
+    filename=None)
 
 # PIN SETUP
 Dial = InputDevice(pin=5, pull_up=False)  # Start dialing
@@ -44,7 +43,7 @@ Dialing = 0  # Stores previous Dial value
 # INIT
 logger.info("Establishing connection to database")
 
-db_connection = mariadb.connect("tvi_run_dbuser")
+db_connection = mariadb.connect(host="localhost", user="tvi_run_dbuser", password="", database="tvi") # Read only access
 
 number_length = get_database_number_len(db_connection)
 logger.info("Setting number length to '%i' as read from database" %
@@ -66,16 +65,22 @@ while True:
             while Dial.value:
                 if last_pulse != Pulse.value:
                     if last_pulse == 1:
-                        logger.debug("Recieved Pulse")
+                        logger.debug("Recieved Pulse of value '%s'" % Pulse.value)
                         digit += 1
                 last_pulse = Pulse.value
-                time.sleep(0.001)
+                time.sleep(0.01)
+            # Dial is now off
             if digit >= 0 and digit <= 9:  # Number is between 0 and 9
                 logger.debug("Digit '%i' recieved" % digit)
+                logger.debug("Updating timeout")
+                timeout = time.time()
                 number_arr.append(digit)
                 if len(number_arr) >= number_length:
                     number_str = "".join([str(digit) for digit in number_arr])
                     logger.debug("Whole number '%s' recieved" % number_str)
+                    number_arr.clear()
+                    logger.debug("Clearing timeout")
+                    timeout = None
                     ip = resolve_number_to_ip(db_connection, number_str)
                     if ip:
                         logger.info(
@@ -84,18 +89,16 @@ while True:
                     else:
                         logger.info(
                             "Resolving number '%s' gave no results" % number_str)
-
-                    number_arr.clear()
-                    timeout = None
+                        
             else:
                 logger.error("Invalid digit '%s' recieved, skipping" % digit)
         elif Dialing == 0:
-            timeout = time.time()
             logger.debug("Dialing stopped")
+
 
     if timeout is not None and time.time() >= timeout + timeout_len:
         logger.info("Dialing has timed out after '%s' seconds" % timeout_len)
         timeout = None
         number_arr.clear()
 
-    time.sleep(0.001)
+    time.sleep(0.01)
