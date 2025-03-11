@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Repository for raspberry pi phone to digital related software
 ## tvi-run.py 
 Main logic for reading signals and resolving numbers to ip addresses
