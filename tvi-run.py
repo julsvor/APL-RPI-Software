@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/python
 import mariadb
 import time
