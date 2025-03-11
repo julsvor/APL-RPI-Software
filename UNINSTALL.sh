@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 read -p "To start removal press any key" -n 1
