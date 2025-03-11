@@ -1,4 +1,12 @@
 #!/usr/bin/python
+
+import os, sys
+
+os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
+
+sys.path = sys.path + [os.environ['PYTHONPATH']]
+
+
 import argparse
 import mariadb
 import logging
