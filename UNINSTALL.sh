@@ -1,7 +1,14 @@
 #!/bin/bash
-set -e
 
 read -p "To start removal press any key" -n 1
+
+systemctl is-active --quiet tvi
+if [ $? == 0 ]; then
+echo "tvi service is still running, make sure its turned off: $RETVAL"
+exit
+fi
+
+set -e
 
 SERVICE_USER=tvi
 
