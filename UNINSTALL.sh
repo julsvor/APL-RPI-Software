@@ -1,7 +1,10 @@
-#!/bin/bash
+#!/usr/bin/bash
 # set -e
 
 read -p "To start removal press any key" -n 1
+
+# To make sure the service isnt running
+sudo systemctl stop tvi
 
 SERVICE_USER=tvi
 
@@ -11,7 +14,7 @@ BINARY_INSTALL_DIR=/usr/local/bin/
 SERVICE_FILE=tvi.service
 SERVICE_INSTALL_DIR=/etc/systemd/system/
 
-LIBRARY_DIR=/usr/local/lib/python3.11/dist-packages/
+LIBRARY_DIR=/usr/local/lib/tvi/lib/python3.11/site-packages/
 LIB1=tvi_connection_utils.py
 LIB2=tvi_dbutils.py
 LIB3=tvi_phone_ip_pair.py
@@ -19,15 +22,15 @@ LIB3=tvi_phone_ip_pair.py
 
 echo "Dropping database and users"
 
-mysql -e "
+mariadb -e "
 DROP DATABASE tvi;
 "
 
-mysql -e "
+mariadb -e "
 DROP USER 'tvi_run_dbuser'@localhost;
 "
 
-mysql -e "
+mariadb -e "
 DROP USER 'tvi_dbcli_dbuser'@localhost; 
 "
 
@@ -47,6 +50,8 @@ echo "Removing libraries"
 rm "${LIBRARY_DIR}${LIB1}"
 rm "${LIBRARY_DIR}${LIB2}"
 rm "${LIBRARY_DIR}${LIB3}"
+
+rm -r "/usr/local/lib/tvi"
 
 echo "Removal finished"
 

@@ -16,7 +16,7 @@ def get_ips_from_db(conn: mariadb.Connection) -> list[str] | None:
         SELECT number, ip_address FROM number_ip_mappings;
         """
 
-        result = cursor.execute(query)
+        cursor.execute(query)
         records = cursor.fetchall()
         return records
     except mariadb.Error as e:
@@ -34,14 +34,15 @@ def add_numbers_to_db(conn: mariadb.Connection,
 
             if combo.is_valid() == False:
                 logger.error(
-                    "Skipping, Invalid IP/Number format: '%s'" %
-                    combo.get_combo_str(),
-                    exc_info=combo.get_error())
+                    "Skipping, Invalid IP/Number format: '%s'" % combo.get_combo_str(), exc_info=combo.get_error())
                 continue
 
             data_list.append(
                 (combo.get_raw_ip_address(),
                  combo.get_phone_number()))
+
+        print(ip_phone_combo)
+        print(data_list)
 
         if len(data_list) < 1:
             logger.warning("No numbers were added as all failed to validate")
@@ -67,7 +68,7 @@ def remove_numbers_from_db(conn: mariadb.Connection, numbers_list: list[int]):
         data_list = []
 
         for number in numbers_list:
-            data_list.append(tuple([number]))
+            data_list.append(tuple(str([number])))
 
         query = """
         DELETE FROM number_ip_mappings
@@ -105,16 +106,14 @@ def resolve_number_to_ip(conn: mariadb.Connection,
         cursor = conn.cursor()
 
         query = """
-        SELECT ip FROM number_ip_mappings WHERE number = ?;
+        SELECT ip_address FROM number_ip_mappings WHERE number = ?;
         """
         result = cursor.execute(query, (number,))
         result = cursor.fetchone()
 
         if isinstance(result, tuple):
             ip = str(ipaddress.ip_address(result[0]))
-            logger.info(
-                "Resolved number '%s' to IP adress '%s'" %
-                (number, ip))
+            logger.info("Resolved number '%s' to IP adress '%s'" % (number, ip))
             return ip
         return result
     except Exception as e:
@@ -137,7 +136,7 @@ def create_db(user: str, password: str, number_length: int) -> None:
 
         query = """
             CREATE TABLE IF NOT EXISTS number_ip_mappings (
-                number INT UNSIGNED PRIMARY KEY,
+                number VARCHAR(10) PRIMARY KEY,
                 ip_address BINARY(4) NOT NULL,
                 port INT UNSIGNED NULL,
                 UNIQUE (number),

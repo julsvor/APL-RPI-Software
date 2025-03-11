@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 # set -e
 
 read -p "To start installation press any key" -n 1
@@ -6,38 +6,50 @@ read -p "To start installation press any key" -n 1
 SERVICE_USER=tvi
 
 BINARY_PROGRAM=tvi-run.py
+BINARY_CLI_PROGRAM=tvi-dbcli.py
 BINARY_INSTALL_DIR=/usr/local/bin/
 
 SERVICE_FILE=tvi.service
 SERVICE_INSTALL_DIR=/etc/systemd/system/
 
-LIBRARY_DIR=/usr/local/lib/python3.11/dist-packages/
+LIBRARY_DIR=/usr/local/lib/tvi/lib/python3.11/site-packages/
 LIB1=tvi_connection_utils.py
 LIB2=tvi_dbutils.py
 LIB3=tvi_phone_ip_pair.py
 
 echo "Installing MariaDB"
-apt install -y mariadb libmariadb-dev
-pip install mariadb
+apt install -y mariadb-server libmariadb-dev
 
-mysql -e "
+mariadb -e "
 CREATE USER 'tvi_run_dbuser'@localhost IDENTIFIED BY '';
 GRANT SELECT ON *.* TO 'tvi_run_dbuser'@'localhost';
 FLUSH PRIVILEGES;
 "
 
-mysql -e "
+mariadb -e "
 CREATE USER 'tvi_dbcli_dbuser'@localhost IDENTIFIED BY 'readwrite'; 
 GRANT ALL PRIVILEGES ON *.* TO 'tvi_dbcli_dbuser'@'localhost';
 FLUSH PRIVILEGES;
 "
 
+python3 -m venv /usr/local/lib/tvi
+source /usr/local/lib/tvi/bin/activate
+pip install mariadb
+
+PYTHONPATH=/usr/local/lib/tvi/lib/python3.11/site-packages/ /usr/bin/python ./$BINARY_CLI_PROGRAM create
+
 echo "Creating user '$SERVICE_USER' with group 'gpio'"
-sudo useradd -M -U -r -G gpio -s /usr/sbin/nologin $SERVICE_USER
+sudo useradd -m -U -r -G gpio -s /usr/sbin/nologin $SERVICE_USER
 
 echo "Copying $BINARY_PROGRAM to $BINARY_INSTALL_DIR"
 cp $BINARY_PROGRAM $BINARY_INSTALL_DIR
 chown tvi:tvi "${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
+chmod +x "${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
+
+echo "Copying $BINARY_CLI_PROGRAM to $BINARY_INSTALL_DIR"
+cp $BINARY_CLI_PROGRAM $BINARY_INSTALL_DIR
+chown tvi:tvi "${BINARY_INSTALL_DIR}${BINARY_CLI_PROGRAM}"
+chmod +x "${BINARY_INSTALL_DIR}${BINARY_CLI_PROGRAM}"
 
 echo "Copying $SERVICE_FILE to $SERVICE_INSTALL_DIR"
 cp $SERVICE_FILE $SERVICE_INSTALL_DIR
@@ -53,5 +65,5 @@ cp $LIB3 $LIBRARY_DIR
 chown tvi:tvi "${LIBRARY_DIR}${LIB3}"
 
 echo "Installation finished, start the software with systemctl start tvi"
-echo "run 'db-cli create' to create a new database"
+
 

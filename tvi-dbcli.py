@@ -65,10 +65,7 @@ def main(args):
         with mariadb.connect(host="localhost", user="tvi_dbcli_dbuser", password="readwrite", database="tvi") as conn:
             if command == "add":
                 number_length = get_database_number_len(conn)
-                ip_number_pairs = [
-                    PhoneNumberIPPair(
-                        combo,
-                        number_length) for combo in args.ip_number_pairs]
+                ip_number_pairs = [PhoneNumberIPPair(combo,number_length) for combo in args.ip_number_pairs]
                 add_numbers_to_db(conn, ip_number_pairs)
             elif command == "list":
                 number_length = get_database_number_len(conn)

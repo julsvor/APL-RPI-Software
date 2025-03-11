@@ -1,10 +1,13 @@
 [Unit]
-Description=A service to run dial analog to digital signal conversion and number resolution.
+Description=A service to
 
 [Service]
 User=tvi
-
+Group=gpio
+WorkingDirectory=/home/tvi/
+Environment="PYTHONPATH=/usr/local/lib/tvi/lib/python3.11/site-packages/"
 ExecStart=python /usr/local/bin/tvi-run.py
 
+# Not used currently, creates enviroment var LOGS_DIRECTORY
 LogsDirectory=tvi
 

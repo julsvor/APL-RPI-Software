@@ -3,7 +3,7 @@ from ipaddress import ip_address
 
 class PhoneNumberIPPair():
 
-    __phone_number: int
+    __phone_number: str
     __ip_address: bytes
     __is_valid: bool = True
     __error: Exception
@@ -31,7 +31,7 @@ class PhoneNumberIPPair():
                 raise ValueError("Incorrect number size")
 
             # ASSIGN VALUES
-            self.__phone_number = int(number)
+            self.__phone_number = number
             self.__ip_address = ip.packed
 
         except Exception as e:
@@ -43,10 +43,10 @@ class PhoneNumberIPPair():
         return ip
 
     def get_raw_ip_address(self) -> bytes:
-        return self.__ip_address
+        return bytes(self.__ip_address)
 
     def get_phone_number(self) -> str:
-        return self.__phone_number
+        return str(self.__phone_number)
 
     def get_error(self):
         return self.__error
@@ -56,9 +56,3 @@ class PhoneNumberIPPair():
 
     def is_valid(self) -> bool:
         return self.__is_valid
-
-    def __str__(self):
-        return self.__combo_str
-
-    def __repr__(self):
-        return f"PhoneNumberIPPair(ip='{self.get_ip_address()}', number='{self.get_phone_number()}')"
