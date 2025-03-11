@@ -74,9 +74,12 @@ def main(args):
             if command == "add":
                 number_length = get_database_number_len(conn)
                 ip_number_pairs = [PhoneNumberIPPair(combo,number_length) for combo in args.ip_number_pairs]
+<<<<<<< HEAD
                 if len(ip_number_pairs) < 1:
                     logger.info("No numbers to add")
                     exit(0)
+=======
+>>>>>>> e064793715689191896f613c7125ad54b3235f6a
                 add_numbers_to_db(conn, ip_number_pairs)
             elif command == "list":
                 number_length = get_database_number_len(conn)

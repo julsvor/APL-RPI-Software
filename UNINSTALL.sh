@@ -1,7 +1,14 @@
 #!/usr/bin/bash
+<<<<<<< HEAD
 set -e
+=======
+# set -e
+>>>>>>> e064793715689191896f613c7125ad54b3235f6a
 
 read -p "To start removal press any key" -n 1
+
+# To make sure the service isnt running
+sudo systemctl stop tvi
 
 SERVICE_USER=tvi
 
