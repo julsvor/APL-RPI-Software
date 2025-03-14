@@ -61,7 +61,7 @@ chown root "${SERVICE_INSTALL_DIR}${SERVICE_FILE}"
 echo "Copying library packages"
 
 cp -r $LIB_PACKAGE $LIBRARY_DIR
-chown -r tvi:tvi "${LIBRARY_DIR}${$LIB_PACKAGE}"
+chown -r tvi:tvi "${LIBRARY_DIR}${LIB_PACKAGE}"
 
 
 echo "Installation finished, start the software with systemctl start tvi"
