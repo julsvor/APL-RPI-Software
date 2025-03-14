@@ -7,14 +7,14 @@ os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
 sys.path = sys.path + [os.environ['PYTHONPATH']]
 
 
-import mariadb
+import mariadb # type: ignore
 import time
 import logging
 import ipaddress
 import os
 from gpiozero import InputDevice, OutputDevice  # type: ignore
-from tvi_dbutils import get_database_number_len, resolve_number_to_ip
-from tvi_connection_utils import CallIP
+from tvi_lib.tvi_dbutils import get_database_number_len, resolve_number_to_ip
+from tvi_lib.tvi_connection_utils import CallIP
 from pathlib import Path
 
 

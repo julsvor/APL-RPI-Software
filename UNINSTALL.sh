@@ -2,9 +2,15 @@
 
 read -p "To start removal press any key" -n 1
 
+if [ $(id -u) -ne 0 ]
+  then echo Elevated permssions needed to use this script. Use sudo or root
+  exit
+fi
+
+
 systemctl is-active --quiet tvi
 if [ $? == 0 ]; then
-echo "tvi service is still running, make sure its turned off: $RETVAL"
+echo "tvi service is still running, make sure its turned off before uninstalling"
 exit
 fi
 
