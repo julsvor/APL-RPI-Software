@@ -14,7 +14,7 @@ echo "tvi service is still running, make sure its turned off before uninstalling
 exit
 fi
 
-set -e
+# set -e
 
 SERVICE_USER=tvi
 

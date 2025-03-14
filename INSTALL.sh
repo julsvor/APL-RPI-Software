@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-set -e
+# set -e
 
 if [ $(id -u) -ne 0 ]
   then echo Elevated permssions needed to use this script. Use sudo or root
@@ -61,7 +61,7 @@ chown root "${SERVICE_INSTALL_DIR}${SERVICE_FILE}"
 echo "Copying library packages"
 
 cp -r $LIB_PACKAGE $LIBRARY_DIR
-chown -r tvi:tvi "${LIBRARY_DIR}${LIB_PACKAGE}"
+chown -R tvi:tvi "${LIBRARY_DIR}${LIB_PACKAGE}"
 
 
 echo "Installation finished, start the software with systemctl start tvi"
