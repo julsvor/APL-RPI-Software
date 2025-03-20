@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os, sys
 
 os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
