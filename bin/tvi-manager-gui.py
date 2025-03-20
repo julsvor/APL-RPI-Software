@@ -17,7 +17,7 @@ class IPManager:
         self.root = root
         self.root.title("IP Manager")
 
-        self.ip_list = []  # Dictionary to store number-IP pairs
+        self.ip_list = []
 
         self.listbox = tk.Listbox(root, width=50, height=10)
         self.listbox.pack(pady=10)
