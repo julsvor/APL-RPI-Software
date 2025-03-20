@@ -33,6 +33,15 @@ class PhoneNumberIPPair():
         self.__phone_number = number
         self.__ip_address = ip.packed
 
+
+    # @classmethod
+    # def from_string(cls):
+    #     pass
+
+    # @classmethod
+    # def from_params(cls):
+    #     pass
+
     def get_ip_address(self) -> str:
         ip = ip_address(self.__ip_address).compressed
         return ip

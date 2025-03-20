@@ -1,9 +1,7 @@
 # Repository for raspberry pi phone to digital related software
-## tvi-run.py 
-Main logic for reading signals and resolving numbers to ip addresses
 
 ## INSTALL
-Run the script INSTALL.sh as sudo
+Run the script INSTALL.sh found in scripts/INSTALL.sh as sudo
 ```bash
 sudo bash ./INSTALL.sh
 ```
@@ -34,6 +32,11 @@ Once you have made sure the program is not longer running then run the UNINSTALL
 ```bash
 sudo bash ./UNINSTALL.sh
 ```
+
+## tvi-run.py 
+Main logic for reading signals and resolving numbers to ip addresses
+## tvi-manager-gui.py
+A GUI for interacting with the associated database. It allows adding, listing and deletion of records in database.  
 ## tvi-dbcli 
 Util functions and command line creation/interaction with sqlite database  
 ## Usage
@@ -69,3 +72,10 @@ Drops the database and all records in it
 ```bash
 tvi-dbcli.py drop # Drops the database and all records in it
 ```
+## Library files
+### tvi_connection_utils.py
+Currently unused
+### tvi_dbutils.py
+Contains code for queries to database
+### tvi_phone_pair.py
+Contains code for a class that processes strings into proper ip and number pairs

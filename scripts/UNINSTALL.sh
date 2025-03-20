@@ -19,6 +19,8 @@ fi
 SERVICE_USER=tvi
 
 BINARY_PROGRAM=tvi-run.py
+BINARY_CLI_PROGRAM=tvi-dbcli.py
+BINARY_GUI_PROGRAM=tvi-manager-gui.py
 BINARY_INSTALL_DIR=/usr/local/bin/
 
 SERVICE_FILE=tvi.service
@@ -50,6 +52,12 @@ userdel $SERVICE_USER
 
 echo "Removing program at ${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
 rm "${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
+
+echo "Removing cli program at ${BINARY_INSTALL_DIR}${BINARY_CLI_PROGRAM}"
+rm "${BINARY_INSTALL_DIR}${BINARY_CLI_PROGRAM}"
+
+echo "Removing gui program at ${BINARY_INSTALL_DIR}${BINARY_GUI_PROGRAM}"
+rm "${BINARY_INSTALL_DIR}${BINARY_GUI_PROGRAM}"
 
 echo "Removing service at ${SERVICE_INSTALL_DIR}${SERVICE_FILE}"
 rm "${SERVICE_INSTALL_DIR}${SERVICE_FILE}"

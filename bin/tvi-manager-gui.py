@@ -1,7 +1,13 @@
+import os, sys
+
+os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
+sys.path = sys.path + [os.environ['PYTHONPATH']]
+
 import tkinter as tk
-from tvi_lib.tvi_dbutils import get_ips_from_db, database_exists, create_db, get_database_number_len, add_pair_to_db, remove_pair_from_db, resolve_number_to_ip
-import mariadb # type: ignore
 from tkinter import messagebox, simpledialog
+import mariadb # type: ignore
+
+from tvi_lib.tvi_dbutils import get_ips_from_db, database_exists, create_db, get_database_number_len, add_pair_to_db, remove_pair_from_db, resolve_number_to_ip
 import ipaddress
 
 
