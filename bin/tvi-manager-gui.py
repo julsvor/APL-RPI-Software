@@ -17,7 +17,7 @@ class IPManager:
         self.root = root
         self.root.title("IP Manager")
 
-        self.ip_dict = {}  # Dictionary to store number-IP pairs
+        self.ip_list = []  # Dictionary to store number-IP pairs
 
         self.listbox = tk.Listbox(root, width=50, height=10)
         self.listbox.pack(pady=10)
@@ -59,7 +59,6 @@ class IPManager:
             messagebox.showerror("Fel", "Ogiltig IP-adress.")
             return
 
-        # self.ip_dict[number] = ip_address
         add_pair_to_db(self.db_connection, number, ip_address)
         self.refresh_list()
 
@@ -70,7 +69,7 @@ class IPManager:
             return
 
         item_text = self.listbox.get(selected[0])
-        number = item_text.split(" - ")[1]
+        number = item_text.split(" - ")[0]
 
         remove_pair_from_db(self.db_connection, number)
 
@@ -78,7 +77,7 @@ class IPManager:
 
     def refresh_list(self):
         
-        self.ip_dict.clear()
+        self.ip_list.clear()
 
         records = get_ips_from_db(self.db_connection)
 
@@ -87,10 +86,12 @@ class IPManager:
             number: str = str(number)
             ip: str = ipaddress.ip_address(ip).compressed
 
-            self.ip_dict[ip] = number
+            self.ip_list.append([ip, number])
 
         self.listbox.delete(0, tk.END)
-        for number, ip in self.ip_dict.items():
+        for combo in self.ip_list:
+            ip = combo[0]
+            number = combo[1]
             self.listbox.insert(tk.END, f"{number} - {ip}")
 
     def validate_ip(self, ip):
