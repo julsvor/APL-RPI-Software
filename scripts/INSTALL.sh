@@ -11,9 +11,9 @@ read -p "To start installation press any key" -n 1
 SERVICE_USER=tvi
 
 BINARY_SOURCE_DIR=./bin/
-BINARY_PROGRAM=${$BINARY_SOURCE_DIR}tvi-run.py
-BINARY_CLI_PROGRAM=${$BINARY_SOURCE_DIR}tvi-dbcli.py
-BINARY_GUI_PROGRAM=${$BINARY_SOURCE_DIR}tvi-manager-gui.py
+BINARY_PROGRAM=tvi-run.py
+BINARY_CLI_PROGRAM=tvi-dbcli.py
+BINARY_GUI_PROGRAM=tvi-manager-gui.py
 BINARY_INSTALL_DIR=/usr/local/bin/
 
 SERVICE_FILE=tvi.service
@@ -46,15 +46,22 @@ PYTHONPATH=/usr/local/lib/tvi/lib/python3.11/site-packages/ /usr/bin/python ./$B
 echo "Creating user '$SERVICE_USER' with group 'gpio'"
 sudo useradd -m -U -r -G gpio -s /usr/sbin/nologin $SERVICE_USER
 
-echo "Copying binaries from $BINARY_PROGRAM to $BINARY_INSTALL_DIR"
-cp $BINARY_PROGRAM $BINARY_INSTALL_DIR
+
+echo "Copying binaries from $BINARY_SOURCE_DIR to $BINARY_INSTALL_DIR"
+cp "${BINARY_SOURCE_DIR}$BINARY_PROGRAM" $BINARY_INSTALL_DIR
 chown tvi:tvi "${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
 chmod +x "${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
 
 echo "Copying $BINARY_CLI_PROGRAM to $BINARY_INSTALL_DIR"
-cp $BINARY_CLI_PROGRAM $BINARY_INSTALL_DIR
+cp "${BINARY_SOURCE_DIR}$BINARY_CLI_PROGRAM" $BINARY_INSTALL_DIR
 chown tvi:tvi "${BINARY_INSTALL_DIR}${BINARY_CLI_PROGRAM}"
 chmod +x "${BINARY_INSTALL_DIR}${BINARY_CLI_PROGRAM}"
+
+echo "Copying $BINARY_GUI_PROGRAM to $BINARY_INSTALL_DIR"
+cp "${BINARY_SOURCE_DIR}$BINARY_GUI_PROGRAM" $BINARY_INSTALL_DIR
+chown tvi:tvi "${BINARY_INSTALL_DIR}${BINARY_GUI_PROGRAM}"
+chmod +x "${BINARY_INSTALL_DIR}${BINARY_GUI_PROGRAM}"
+
 
 echo "Copying $SERVICE_FILE to $SERVICE_INSTALL_DIR"
 cp $SERVICE_FILE $SERVICE_INSTALL_DIR
