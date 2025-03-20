@@ -23,8 +23,7 @@ def get_ips_from_db(conn: mariadb.Connection) -> list[str] | None:
         logger.error("MariaDB error: ", exc_info=e)
 
 
-def add_numbers_to_db(conn: mariadb.Connection,
-                      ip_phone_combo: list[PhoneNumberIPPair]) -> None:
+def add_numbers_to_db(conn: mariadb.Connection, ip_phone_combo: list[PhoneNumberIPPair]) -> None:
     try:
         cursor = conn.cursor()
 
@@ -33,8 +32,7 @@ def add_numbers_to_db(conn: mariadb.Connection,
         for combo in ip_phone_combo:
 
             if combo.is_valid() == False:
-                logger.error(
-                    "Skipping, Invalid IP/Number format: '%s'" % combo.get_combo_str(), exc_info=combo.get_error())
+                logger.error("Skipping, Invalid IP/Number format: '%s'" % combo.get_combo_str(), exc_info=combo.get_error())
                 continue
 
             data_list.append((combo.get_raw_ip_address(),combo.get_phone_number()))
@@ -52,9 +50,10 @@ def add_numbers_to_db(conn: mariadb.Connection,
 
         conn.commit()
     except mariadb.IntegrityError as e:
-        logger.error("Trying to add number that already exists")
+        logger.error("Trying to add number that already exists", exc_info=e)
     except mariadb.Error as e:
         logger.error("MariaDB error: ", exc_info=e)
+
 
 
 def remove_numbers_from_db(conn: mariadb.Connection, numbers_list: list[str], number_length=4):
@@ -198,5 +197,42 @@ def drop_db(conn: mariadb.Connection) -> None:
         cursor.execute(query)
 
         conn.commit()
+    except mariadb.Error as e:
+        logger.error("MariaDB error: ", exc_info=e)
+
+
+def add_pair_to_db(conn: mariadb.Connection, number:int, ip_address:str) -> None:
+    try:
+        cursor = conn.cursor()
+
+        ip_address = ipaddress.ip_address(ip_address).packed
+
+        query = """
+        INSERT INTO number_ip_mappings (number, ip_address)
+        VALUES (?, ?);"""
+
+        cursor.execute(query, (number, ip_address))
+
+        conn.commit()
+    except mariadb.IntegrityError as e:
+        logger.error("Trying to add number that already exists", exc_info=e)
+    except mariadb.Error as e:
+        logger.error("MariaDB error: ", exc_info=e)
+
+def remove_pair_from_db(conn: mariadb.Connection, number) -> None:
+    try:
+        cursor = conn.cursor()
+
+
+        query = """
+        DELETE FROM number_ip_mappings
+        WHERE number = ?;
+        """
+
+        cursor.execute(query, (number,))
+
+        conn.commit()
+    except mariadb.IntegrityError as e:
+        logger.error("Trying to add number that already exists", exc_info=e)
     except mariadb.Error as e:
         logger.error("MariaDB error: ", exc_info=e)

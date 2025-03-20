@@ -8,35 +8,30 @@ class PhoneNumberIPPair():
     __is_valid: bool = True
     __error: Exception
     __combo_str: str
-    __port: int
+    __port: int = None
 
-    def __init__(self, combo_str: str, phone_number_size=4):
+    def __init__(self, combo_str: str, phone_number_length=4):
         self.__combo_str = combo_str
-        try:
 
-            # combo_str, port = combo_str.split(":", 1)
+        if combo_str.find(':') != -1:
+            combo_str, port = combo_str.split(":", 1)
 
-            # if port and type(port) == int:
-            #     self.__port = port
-            #     raise NotImplementedError(
-            #         "Port feature has not been implmented yet")
+            port = int(port)
+            self.__port = port
 
-            number, ip = combo_str.split("=", 1)
 
-            # IP VALIDATION
-            ip = ip_address(ip)
+        number, ip = combo_str.split("=", 1)
 
-            # NUMBER VALIDATION
-            if len(number) != phone_number_size:
-                raise ValueError("Incorrect number size")
+        # IP VALIDATION
+        ip = ip_address(ip)
 
-            # ASSIGN VALUES
-            self.__phone_number = number
-            self.__ip_address = ip.packed
+        # NUMBER VALIDATION
+        if num_len := len(number) != phone_number_length:
+            raise ValueError("Incorrect number '%s' with length of '%s' gotten, expected number of length '%s'" % (number, num_len, phone_number_length))
 
-        except Exception as e:
-            self.__is_valid = False
-            self.__error = e
+        # ASSIGN VALUES
+        self.__phone_number = number
+        self.__ip_address = ip.packed
 
     def get_ip_address(self) -> str:
         ip = ip_address(self.__ip_address).compressed
@@ -56,4 +51,10 @@ class PhoneNumberIPPair():
 
     def is_valid(self) -> bool:
         return self.__is_valid
+    
+    def has_port(self) -> bool:
+        return False if self.__port == None else True
+    
+    def get_port(self) -> int:
+        return self.__port
 

@@ -2,10 +2,9 @@
 
 import os, sys
 
+# Read from virtual environment
 os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
-
 sys.path = sys.path + [os.environ['PYTHONPATH']]
-
 
 import argparse
 import mariadb # type: ignore
@@ -61,6 +60,7 @@ create_subparser.add_argument(
     dest="number_length",
     required=False)
 
+# Drop current database
 drop_subparser = subparser.add_parser("drop", help="Remove database")
 
 
@@ -78,10 +78,15 @@ def main(args):
 
         with mariadb.connect(host="localhost", user="tvi_dbcli_dbuser", password="readwrite", database="tvi") as conn:
 
-
             if command == "add":
                 number_length = get_database_number_len(conn)
-                ip_number_pairs = [PhoneNumberIPPair(combo,number_length) for combo in args.ip_number_pairs]
+                ip_number_pairs = []
+                for combo in args.ip_number_pairs:
+                    try:
+                        x = PhoneNumberIPPair(combo, number_length)
+                        ip_number_pairs.append(x)
+                    except Exception as e:
+                        logger.error("Failed to parse '%s'" % combo, exc_info=e)
 
                 if len(ip_number_pairs) < 1:
                     logger.info("No numbers to add")
@@ -91,17 +96,13 @@ def main(args):
             elif command == "list":
                 number_length = get_database_number_len(conn)
                 records = get_ips_from_db(conn)
-                print(
-                    "Databases phone_number length is set to: '%s'" %
-                    number_length)
+                print("Databases phone_number length is set to: '%s'" % number_length)
                 if not records:
                     print("Database is empty")
                 else:
                     for record in enumerate(records):
                         print(
-                            "[record %s] %s = %s" %
-                            (record[0], record[1][0], ip_address(
-                                record[1][1]).compressed))
+                            "[record %s] %s = %s" % (record[0], record[1][0], ip_address(record[1][1]).compressed))
             elif command == "delete":
                 numbers = args.numbers
                 number_length = get_database_number_len(conn)

@@ -2,10 +2,9 @@
 
 import os, sys
 
+# Read from virtual environment
 os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
-
 sys.path = sys.path + [os.environ['PYTHONPATH']]
-
 
 import mariadb # type: ignore
 import time
@@ -17,25 +16,14 @@ from tvi_lib.tvi_dbutils import get_database_number_len, resolve_number_to_ip
 from tvi_lib.tvi_connection_utils import CallIP
 from pathlib import Path
 
-
-# LOGS_DIR = os.getenv("LOGS_DIRECTORY", None)
-# logfile = "log.txt"
-
-# if LOGS_DIR is not None:
-#     LOGS_DIR = Path(LOGS_DIR, logfile)
-
-
 # LOGGING
 logger = logging.getLogger("tvi-logger")
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="[%(levelname)s] - %(asctime)s - %(message)s",
-    filename=None)
+logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] - %(asctime)s - %(message)s", filename=None)
 
 # PIN SETUP
 Dial = InputDevice(pin=5, pull_up=False)  # Start dialing
 # Recieves pulse each falling edge when dialing is activated
-Pulse = InputDevice(pin=6, pull_up=True)
+Pulse = InputDevice(pin=6, pull_up=True) # Pulse
 
 # CONFIG
 timeout_len = 30  # Stores timeout in seconds between digits in a number, only checked when dialing is off
@@ -44,7 +32,7 @@ timeout_len = 30  # Stores timeout in seconds between digits in a number, only c
 db_connection = None  # Stores database connection
 number_length: int  # Stores expected length of the number
 number_arr = []  # Store whole number
-timeout: int | None = None  # Stores timeout timer
+timeout: int | None = None  # Stores last activated time when active
 Dialing = 0  # Stores previous Dial value
 
 
@@ -53,9 +41,8 @@ logger.info("Establishing connection to database")
 
 db_connection = mariadb.connect(host="localhost", user="tvi_run_dbuser", password="", database="tvi") # Read only access
 
-number_length = get_database_number_len(db_connection)
-logger.info("Setting number length to '%i' as read from database" %
-            number_length)
+number_length = get_database_number_len(db_connection) # Get database number length to set expected number dialing length
+logger.info(f"Setting number length to '{number_length}' as read from database")
 
 
 logger.info("Initialization finished")
@@ -67,45 +54,41 @@ while True:
         Dialing = Dial.value
         if Dialing == 1:
             logger.debug("Dialing started")
-            digit = 0
-            digit -= 1  # Remove first pulse
-            last_pulse = Pulse.value
-            while Dial.value:
+            digit = -1  # Negate first pulse
+            last_pulse = Pulse.value # Track changes in pulse
+            while Dial.value: # While dialing is active
                 if last_pulse != Pulse.value:
-                    if last_pulse == 1:
-                        logger.debug("Recieved Pulse of value '%s'" % Pulse.value)
+                    if last_pulse == 1: # Add digit on rising edge of pulse
+                        logger.debug(f"Recieved Pulse of value '{Pulse.value}'")
                         digit += 1
                 last_pulse = Pulse.value
                 time.sleep(0.01)
             # Dial is now off
             if digit >= 0 and digit <= 9:  # Number is between 0 and 9
-                logger.debug("Digit '%i' recieved" % digit)
+                logger.debug(f"Digit '{digit}' recieved")
                 logger.debug("Updating timeout")
                 timeout = time.time()
                 number_arr.append(digit)
-                if len(number_arr) >= number_length:
-                    number_str = "".join([str(digit) for digit in number_arr])
-                    logger.debug("Whole number '%s' recieved" % number_str)
-                    number_arr.clear()
-                    logger.debug("Clearing timeout")
+                if len(number_arr) >= number_length: # Checks if a full number has been reached
+                    number_str = "".join([str(number_digit) for number_digit in number_arr]) # Converts the number array to a string
+                    logger.debug(f"Whole number '{number_str}' recieved")
+                    number_arr.clear() 
                     timeout = None
+                    logger.debug("Clearing timeout")
                     ip = resolve_number_to_ip(db_connection, number_str)
-                    if ip:
-                        logger.info(
-                            "Successfully resolved number '%s' to ip address '%s'" % (number_str, ip))
+                    if ip: # resolve number to a valid ip address
+                        logger.info(f"Successfully resolved number '{number_str}' to ip address '{ip}'")
                         # CallIP(ip)
                     else:
-                        logger.info(
-                            "Resolving number '%s' gave no results" % number_str)
-                        
+                        logger.info(f"Resolving number '{number_str}' gave no results")     
             else:
-                logger.error("Invalid digit '%s' recieved, skipping" % digit)
+                logger.error(f"Invalid digit '{digit}' recieved, skipping")
         elif Dialing == 0:
             logger.debug("Dialing stopped")
 
 
-    if timeout is not None and time.time() >= timeout + timeout_len:
-        logger.info("Dialing has timed out after '%s' seconds" % timeout_len)
+    if timeout is not None and time.time() >= timeout + timeout_len: # If timeout is enabled and has passed timeout length
+        logger.info(f"Dialing has timed out after '{timeout_len}' seconds")
         timeout = None
         number_arr.clear()
 
