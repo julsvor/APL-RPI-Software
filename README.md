@@ -74,8 +74,10 @@ tvi-dbcli.py drop # Drops the database and all records in it
 ```
 ## Library files
 ### tvi_connection_utils.py
-Currently unused
+Contains code for network-audio interaction
 ### tvi_dbutils.py
 Contains code for queries to database
 ### tvi_phone_pair.py
 Contains code for a class that processes strings into proper ip and number pairs
+### tvi_callmanager.py
+Contains code for managing the state of the call aswell as some utility functions

@@ -1,9 +1,6 @@
-import argparse
-import logging
-import os
-import ipaddress
+import logging, ipaddress
 import mariadb # type: ignore
-from tvi_lib.tvi_phone_ip_pair import PhoneNumberIPPair
+from tvi_phone_ip_pair import PhoneNumberIPPair
 
 logger = logging.getLogger("tvi-logger")
 
@@ -201,7 +198,7 @@ def drop_db(conn: mariadb.Connection) -> None:
         logger.error("MariaDB error: ", exc_info=e)
 
 
-def add_pair_to_db(conn: mariadb.Connection, number:int, ip_address:str) -> None:
+def add_record_to_db(conn: mariadb.Connection, number:int, ip_address:str) -> None:
     try:
         cursor = conn.cursor()
 
@@ -219,7 +216,7 @@ def add_pair_to_db(conn: mariadb.Connection, number:int, ip_address:str) -> None
     except mariadb.Error as e:
         logger.error("MariaDB error: ", exc_info=e)
 
-def remove_pair_from_db(conn: mariadb.Connection, number) -> None:
+def remove_record_from_db(conn: mariadb.Connection, number) -> None:
     try:
         cursor = conn.cursor()
 

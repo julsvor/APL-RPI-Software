@@ -43,7 +43,7 @@ logger.info(f"Setting number length to '{number_length}' as read from database")
 
 
 logger.info("Listening for calls on interface 0.0.0.0:5000")
-server_thread = threading.Thread(target=listen_for_call).start()
+server_thread = threading.Thread(target=listen_for_call, daemon=True).start()
 
 logger.info("Initialization finished")
 

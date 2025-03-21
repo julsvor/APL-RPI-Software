@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog
 import mariadb # type: ignore
 
-from tvi_lib.tvi_dbutils import get_ips_from_db, database_exists, create_db, get_database_number_len, add_pair_to_db, remove_pair_from_db, resolve_number_to_ip
+from tvi_lib.tvi_dbutils import get_ips_from_db, database_exists, create_db, get_database_number_len, add_record_to_db, remove_record_from_db, resolve_number_to_ip
 import ipaddress
 
 
@@ -59,7 +59,7 @@ class IPManager:
             messagebox.showerror("Fel", "Ogiltig IP-adress.")
             return
 
-        add_pair_to_db(self.db_connection, number, ip_address)
+        add_record_to_db(self.db_connection, number, ip_address)
         self.refresh_list()
 
     def remove_ip(self):
@@ -71,7 +71,7 @@ class IPManager:
         item_text = self.listbox.get(selected[0])
         number = item_text.split(" - ")[0]
 
-        remove_pair_from_db(self.db_connection, number)
+        remove_record_from_db(self.db_connection, number)
 
         self.refresh_list()
 
