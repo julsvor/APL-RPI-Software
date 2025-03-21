@@ -1,14 +1,6 @@
 #!/usr/bin/python
-
-import os, sys
-
-# Read from virtual environment
-os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
-sys.path = sys.path + [os.environ['PYTHONPATH']]
-
-import argparse
+import os, sys, argparse, logging
 import mariadb # type: ignore
-import logging
 from tvi_lib.tvi_phone_ip_pair import PhoneNumberIPPair
 from tvi_lib.tvi_dbutils import create_db, add_numbers_to_db, remove_numbers_from_db, get_database_number_len, get_ips_from_db, drop_db, database_exists
 from ipaddress import ip_address

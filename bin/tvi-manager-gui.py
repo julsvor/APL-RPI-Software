@@ -1,9 +1,4 @@
 #!/usr/bin/python
-import os, sys
-
-os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
-sys.path = sys.path + [os.environ['PYTHONPATH']]
-
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 import mariadb # type: ignore
@@ -29,10 +24,15 @@ class IPManager:
         self.remove_button.pack(pady=5)
 
         if database_exists(user="tvi_dbcli_dbuser", password="readwrite") == False:
-            answer = messagebox.askokcancel("Databasen finns inte, skapa ny?")
+            answer = messagebox.askokcancel("Info", "Databasen finns inte, skapa ny?")
             if answer == True:
                 number_length = simpledialog.askinteger("Skapar databas", prompt="Hur många siffror ska nummer i databasen ha?", initialvalue=4, maxvalue=255, minvalue=0)
-                create_db("tvi_dbcli_dbuser", "readwrite", number_length)
+                if number_length:
+                    create_db("tvi_dbcli_dbuser", "readwrite", number_length)
+                else:
+                    exit(0)
+            else:
+                exit(0)
 
         
         

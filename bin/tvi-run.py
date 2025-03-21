@@ -1,11 +1,4 @@
 #!/usr/bin/python
-
-import os, sys
-
-# Read from virtual environment
-os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
-sys.path = sys.path + [os.environ['PYTHONPATH']]
-
 import mariadb # type: ignore
 import time, logging, ipaddress, os, threading
 from gpiozero import InputDevice, OutputDevice  # type: ignore

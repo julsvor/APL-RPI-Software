@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export PYTHONPATH=/usr/local/lib/tvi/lib
+
+echo $PYTHONPATH
+
+python3 /usr/local/lib/tvi/tvi-dbcli.py $@

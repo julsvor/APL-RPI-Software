@@ -18,18 +18,16 @@ fi
 
 SERVICE_USER=tvi
 
-BINARY_PROGRAM=tvi-run.py
-BINARY_CLI_PROGRAM=tvi-dbcli.py
-BINARY_GUI_PROGRAM=tvi-manager-gui.py
+BINARY_PROGRAM=tvi-run
+BINARY_CLI_PROGRAM=tvi-dbcli
+BINARY_GUI_PROGRAM=tvi-manager-gui
 BINARY_INSTALL_DIR=/usr/local/bin/
 
 SERVICE_FILE=tvi.service
 SERVICE_INSTALL_DIR=/etc/systemd/system/
 
-LIBRARY_DIR=/usr/local/lib/tvi/lib/python3.11/site-packages/
-LIB1=tvi_connection_utils.py
-LIB2=tvi_dbutils.py
-LIB3=tvi_phone_ip_pair.py
+LIBRARY_DIR=/usr/local/lib/tvi
+
 
 
 echo "Dropping database and users"
@@ -46,18 +44,11 @@ mariadb -e "
 DROP USER 'tvi_dbcli_dbuser'@localhost; 
 "
 
-
 echo "Removing user '$SERVICE_USER'"
 userdel $SERVICE_USER
 
-echo "Removing program at ${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
-rm "${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
-
-echo "Removing cli program at ${BINARY_INSTALL_DIR}${BINARY_CLI_PROGRAM}"
-rm "${BINARY_INSTALL_DIR}${BINARY_CLI_PROGRAM}"
-
-echo "Removing gui program at ${BINARY_INSTALL_DIR}${BINARY_GUI_PROGRAM}"
-rm "${BINARY_INSTALL_DIR}${BINARY_GUI_PROGRAM}"
+echo "Removing programs at ${BINARY_INSTALL_DIR}${BINARY_PROGRAM}"
+rm ${BINARY_INSTALL_DIR}{$BINARY_PROGRAM,$BINARY_CLI_PROGRAM,$BINARY_GUI_PROGRAM}
 
 echo "Removing service at ${SERVICE_INSTALL_DIR}${SERVICE_FILE}"
 rm "${SERVICE_INSTALL_DIR}${SERVICE_FILE}"
@@ -65,11 +56,7 @@ rm "${SERVICE_INSTALL_DIR}${SERVICE_FILE}"
 
 echo "Removing libraries"
 
-rm "${LIBRARY_DIR}${LIB1}"
-rm "${LIBRARY_DIR}${LIB2}"
-rm "${LIBRARY_DIR}${LIB3}"
-
-rm -r "/usr/local/lib/tvi"
+rm -r $LIBRARY_DIR
 
 echo "Removal finished"
 

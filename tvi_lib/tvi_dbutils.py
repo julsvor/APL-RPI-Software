@@ -1,6 +1,6 @@
 import logging, ipaddress
 import mariadb # type: ignore
-from tvi_phone_ip_pair import PhoneNumberIPPair
+from tvi_lib.tvi_phone_ip_pair import PhoneNumberIPPair
 
 logger = logging.getLogger("tvi-logger")
 

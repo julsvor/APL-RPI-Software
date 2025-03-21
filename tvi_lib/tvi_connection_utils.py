@@ -1,5 +1,5 @@
 import threading, time, logging
-from tvi_callmanager import State, Command, CallManager
+from tvi_lib.tvi_callmanager import State, Command, CallManager
 
 logger = logging.getLogger("tvi-logger")
 logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] - %(asctime)s - %(message)s", filename=None)
