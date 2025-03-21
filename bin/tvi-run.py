@@ -7,13 +7,10 @@ os.environ['PYTHONPATH'] = '/usr/local/lib/tvi/lib/python3.11/site-packages/'
 sys.path = sys.path + [os.environ['PYTHONPATH']]
 
 import mariadb # type: ignore
-import time
-import logging
-import ipaddress
-import os
+import time, logging, ipaddress, os, threading
 from gpiozero import InputDevice, OutputDevice  # type: ignore
 from tvi_lib.tvi_dbutils import get_database_number_len, resolve_number_to_ip
-from tvi_lib.tvi_connection_utils import CallIP
+from tvi_lib.tvi_connection_utils import call_ip, listen_for_call
 from pathlib import Path
 
 # LOGGING
@@ -44,6 +41,9 @@ db_connection = mariadb.connect(host="localhost", user="tvi_run_dbuser", passwor
 number_length = get_database_number_len(db_connection) # Get database number length to set expected number dialing length
 logger.info(f"Setting number length to '{number_length}' as read from database")
 
+
+logger.info("Listening for calls on interface 0.0.0.0:5000")
+server_thread = threading.Thread(target=listen_for_call).start()
 
 logger.info("Initialization finished")
 
@@ -78,7 +78,7 @@ while True:
                     ip = resolve_number_to_ip(db_connection, number_str)
                     if ip: # resolve number to a valid ip address
                         logger.info(f"Successfully resolved number '{number_str}' to ip address '{ip}'")
-                        # CallIP(ip)
+                        call_ip(ip)
                     else:
                         logger.info(f"Resolving number '{number_str}' gave no results")     
             else:
