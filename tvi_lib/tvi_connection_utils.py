@@ -1,7 +1,7 @@
 import threading, time, logging
 from tvi_lib.tvi_callmanager import State, Command, CallManager
 
-logger = logging.getLogger("tvi-logger")
+logger = logging.getLogger("tvi-logger-connection")
 logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] - %(asctime)s - %(message)s", filename=None)
 
 
@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] - %(asctime)s -
 cm = CallManager()
 
 ##########
-# Client #
+# CLIENT #
 ##########
 def call_ip(ip: str, port:int=5000) -> None:
     if cm.available_for_call() == True:
@@ -29,7 +29,7 @@ def call_ip(ip: str, port:int=5000) -> None:
                     break
 
 ##########
-# Server #
+# SERVER #
 ##########
 def listen_for_call():
     while True:
@@ -48,14 +48,3 @@ def listen_for_call():
 
                 cm.write_audio_stream(audio_data)
                 cm.server_send_data(address, Command.CONTINUE_CALL, b"Server data")
-
-
-
-
-
-server_thread = threading.Thread(target=listen_for_call)
-server_thread.daemon = True
-server_thread.start()
-
-time.sleep(2)
-call_ip("127.0.0.1")

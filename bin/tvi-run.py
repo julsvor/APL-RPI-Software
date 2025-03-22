@@ -7,8 +7,8 @@ from tvi_lib.tvi_connection_utils import call_ip, listen_for_call
 from pathlib import Path
 
 # LOGGING
-logger = logging.getLogger("tvi-logger")
-logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] - %(asctime)s - %(message)s", filename=None)
+logging.basicConfig(level=logging.DEBUG, format="[%(name)s %(levelname)s] - %(asctime)s - %(message)s", filename=None)
+logger = logging.getLogger("tvi-logger-main")
 
 # PIN SETUP
 Dial = InputDevice(pin=5, pull_up=False)  # Start dialing

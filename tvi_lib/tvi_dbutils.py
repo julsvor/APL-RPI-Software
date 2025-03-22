@@ -2,7 +2,7 @@ import logging, ipaddress
 import mariadb # type: ignore
 from tvi_lib.tvi_phone_ip_pair import PhoneNumberIPPair
 
-logger = logging.getLogger("tvi-logger")
+logger = logging.getLogger("tvi-logger-db")
 
 
 def get_ips_from_db(conn: mariadb.Connection) -> list[str] | None:

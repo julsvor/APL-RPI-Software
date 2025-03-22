@@ -65,6 +65,7 @@ cp -r $LIB_PACKAGE $LIBRARY_DIR
 chown -R tvi:tvi "${LIBRARY_DIR}${LIB_PACKAGE}"
 
 cp -r ./bin/* /usr/local/lib/tvi
+chown -R tvi:tvi /usr/local/lib/tvi
 
 echo "Installation finished, start the software with systemctl start tvi"
 echo "Remember to create a new database with tvi-manager-gui or tvi-dbcli create"

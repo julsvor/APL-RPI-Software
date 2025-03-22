@@ -5,7 +5,7 @@ from tvi_lib.tvi_phone_ip_pair import PhoneNumberIPPair
 from tvi_lib.tvi_dbutils import create_db, add_numbers_to_db, remove_numbers_from_db, get_database_number_len, get_ips_from_db, drop_db, database_exists
 from ipaddress import ip_address
 
-logger = logging.getLogger("dbcli")
+logger = logging.getLogger("tvi-logger-dbcli")
 logging.basicConfig(
     level=logging.WARNING,
     format="%(levelname)s - %(message)s")

@@ -3,7 +3,7 @@ from enum import Enum
 from pyaudio import PyAudio
 
 
-logger = logging.getLogger("tvi-logger")
+logger = logging.getLogger("tvi-logger-call-manager")
 
 
 class State(Enum):
@@ -42,7 +42,9 @@ class CallManager:
         self.__state_lock = threading.Lock()
         self.__stream_lock = threading.Lock()
 
-    # SHARED FUNCTIONS
+    ####################
+    # SHARED FUNCTIONS #
+    ####################
 
     def parse_raw_data(self, data) -> tuple[Command, bytearray]:
         data = bytearray(data)
@@ -72,8 +74,9 @@ class CallManager:
                 return True
             return False
     
-
-    # CLIENT FUNCTIONS
+    ####################
+    # CLIENT FUNCTIONS #
+    ####################
 
     def client_send_data(self, address, command:Command, data:bytes|None=None):
 
@@ -112,7 +115,9 @@ class CallManager:
             self.set_state(State.IDLE)
             return False
 
-    # SERVER FUNCTIONS
+    ####################
+    # SERVER FUNCTIONS #
+    ####################
 
     def server_accept_call(self, address) -> bool:
         logger.debug(f"Accepting call from {address}")
