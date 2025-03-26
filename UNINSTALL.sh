@@ -1,4 +1,5 @@
 #!/bin/bash 
+cd "$(dirname "$0")"
 
 read -p "To start removal press any key" -n 1
 

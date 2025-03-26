@@ -5,9 +5,5 @@ Description=A service to
 User=tvi
 Group=gpio
 WorkingDirectory=/home/tvi/
-Environment="PYTHONPATH=/usr/local/lib/tvi/lib"
-ExecStart=python /usr/local/bin/tvi-run.py
-
-# Not used currently, creates enviroment var LOGS_DIRECTORY
-LogsDirectory=tvi
+ExecStart=python .local/bin/tvi-run.py
 
