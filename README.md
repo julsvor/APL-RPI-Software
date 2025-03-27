@@ -1,27 +1,4 @@
 # Repository for raspberry pi phone to digital related software
-
-## INSTALL
-Run the script INSTALL.sh found in scripts/INSTALL.sh as sudo
-```bash
-sudo bash ./INSTALL.sh
-```
-The tvi-dbcli.py and tvi-run.py binaries will then be installed.
-To run the program execute the command
-```bash
-sudo systemctl start tvi
-```
-To check status
-```bash
-sudo systemctl status tvi
-```
-To run at boot
-```bash
-sudo systemctl enable tvi
-```
-To then disable run at boot
-```bash
-sudo systemctl disable tvi
-```
 ## tvi-run.py 
 Main logic for reading signals and resolving numbers to ip addresses
 ## tvi-manager-gui.py
@@ -40,7 +17,7 @@ Removes records belonging to the numbers provided
 tvi-dbcli delete 1234 # Deletes all records associated with the number '1234'
 ```
 ### list
-List all records currenctly in the database along with the number length the database uses
+List all records currently in the database along with the number length the database uses
 ```bash
 tvi-dbcli list # Lists all records
 ```
@@ -61,17 +38,8 @@ tvi-dbcli drop # Drops the database and all records in it
 ### tvi_connection_utils.py
 Contains code for network-audio interaction
 ### tvi_dbutils.py
-Contains code for queries to database
+Contains code for interacting with the database
 ### tvi_phone_pair.py
-Contains code for a class that processes strings into proper ip and number pairs
+Contains code for a class that processes strings into proper ip and number pairs. Useful for command-line input verification.
 ### tvi_callmanager.py
 Contains code for managing the state of the call aswell as some utility functions
-## UNINSTALL
-stop the program from running with the command
-```bash
-sudo systemctl stop tvi
-```
-Once you have made sure the program is not longer running then run the UNINSTALL script
-```bash
-sudo bash ./UNINSTALL.sh
-```

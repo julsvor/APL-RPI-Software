@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import subprocess
 
 
 setup(
@@ -8,18 +9,16 @@ setup(
     author_email="julsvor@gmail.com",
     description="An internal library used for processing signals, resolving numbers and network calling server/client",
     url="https://github.com/julsvor/APL-RPI-Software",
-    packages=['tvi_lib'],
-    scripts=[
-            'bin/tvi-dbcli.py',
-            'bin/tvi-manager-gui.py',
-            'bin/tvi-run.py',
-    ],
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'tvi-run=tvi_lib.run:main',
+            'tvi-dbcli=tvi_lib.dbcli:main',
+            'tvi-manager-gui=tvi_lib.manager_gui:main',
+            ],
+        },
     install_requires=[
-        'mariadb'
-    ],
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: Unix",
-    ],
+        'gpiozero',
+    ]
 )
+

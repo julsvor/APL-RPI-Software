@@ -1,9 +1,7 @@
-import threading, time, logging
-from tvi_lib.tvi_callmanager import State, Command, CallManager
+import logging
+from tvi_lib.callmanager import State, Command, CallManager
 
 logger = logging.getLogger("tvi-logger-connection")
-logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] - %(asctime)s - %(message)s", filename=None)
-
 
 
 cm = CallManager()
@@ -12,21 +10,24 @@ cm = CallManager()
 # CLIENT #
 ##########
 def call_ip(ip: str, port:int=5000) -> None:
-    if cm.available_for_call() == True:
+    if cm.available_for_call() == True: # State is idle
         logger.info(f"Calling IP {ip}")
-        response = cm.client_request_call((ip, port))
-        logger.info(f"Received response: {response}")
+        response:bool = cm.client_request_call((ip, port))
         if response == True:
+            logger.info("Server accepted call")
             while True:
-                audio_data = cm.read_audio_stream()
+                audio_data = cm.read_audio_stream() # Send microphone input
                 cm.client_send_data((ip, port), Command.CONTINUE_CALL, audio_data)
 
                 try:
-                    data2, addr2 = cm.client_read_data()
+                    data2, addr2 = cm.client_read_data() #
+
                 except TimeoutError as e:
                     logger.error("Client timed out waiting for response")
                     cm.set_state(State.IDLE)
                     break
+        else:
+            logger.info("Server rejected call")
 
 ##########
 # SERVER #
@@ -47,4 +48,4 @@ def listen_for_call():
                     continue
 
                 cm.write_audio_stream(audio_data)
-                cm.server_send_data(address, Command.CONTINUE_CALL, b"Server data")
+                cm.server_send_data(address, Command.CONTINUE_CALL)

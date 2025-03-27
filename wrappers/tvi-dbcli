@@ -1,2 +1,0 @@
-#!/bin/bash 
-sudo su -s /bin/bash tvi -c "cd ~/; .local/bin/tvi-dbcli.py $@"

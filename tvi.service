@@ -1,9 +1,0 @@
-[Unit]
-Description=A service to
-
-[Service]
-User=tvi
-Group=gpio
-WorkingDirectory=/home/tvi/
-ExecStart=python .local/bin/tvi-run.py
-
