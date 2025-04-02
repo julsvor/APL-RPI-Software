@@ -28,10 +28,11 @@ class IPManager:
         self.refresh_list()
 
     def setup_database(self):
-        if not tables_exist("tvi.db"):
+        database = get_connection('tvi.db')
+        if not tables_exist(database):
             answer = messagebox.askokcancel("Info", "Databasen finns inte, skapa ny?")
-            if answer and self.create_database():
-                self.db_connection = get_connection('tvi.db')
+            if answer:
+                self.db_connection = database
                 self.number_length = get_database_number_len(self.db_connection)
             else:
                 exit(0)
@@ -110,7 +111,11 @@ class IPManager:
             return False
 
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     app = IPManager(root)
     root.mainloop()
+
+if __name__ == "__main__":
+    main()
+
